@@ -595,6 +595,20 @@ export const useCippUserActions = () => {
       multiPost: false,
     },
     {
+      // Queues one BEC run per selected user (bulk-capable); results land on
+      // the BEC Reports page
+      label: 'Run BEC investigation',
+      type: 'POST',
+      url: '/api/ExecBECBulkCheck',
+      icon: <CippIcons.MagnifyingGlassIcon />,
+      data: { UserIds: 'id' },
+      multiPost: true,
+      bulkFilterEligible: true,
+      confirmText:
+        'Queue a Business Email Compromise investigation for the selected users? Each run is kept; see the BEC Reports page under Identity > Reports.',
+      condition: (row) => row.userType !== 'Guest',
+    },
+    {
       //tested
       label: 'Create Temporary Access Pass',
       type: 'POST',

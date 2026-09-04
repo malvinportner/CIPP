@@ -93,11 +93,17 @@ Describe 'Invoke-ExecBECBulkCheck' {
         @($script:Orchestrations[0].Batch).Count | Should -Be 1
     }
 
-    It 'refuses more than 50 users and an empty selection without queueing anything' {
-        $Many = Invoke-ExecBECBulkCheck -Request (New-Request ([pscustomobject]@{ tenantFilter = 'contoso.com'; UserIds = @(1..51 | ForEach-Object { "u$_" }) })) -TriggerMetadata $null
-        $Many.StatusCode | Should -Be 500
-        $Many.Body.Results | Should -Match 'At most 50'
+    It 'does not cap the user count - a list over 50 is accepted and every resolvable user is queued' {
+        $Response = Invoke-ExecBECBulkCheck -Request (New-Request ([pscustomobject]@{ tenantFilter = 'contoso.com'; UserIds = @(1..51 | ForEach-Object { "u$_" }) })) -TriggerMetadata $null
+        $Response.StatusCode | Should -Be 200
+        # only u1/u2/u3 resolve in the mock; the other 48 are reported as not found, none refused
+        @($script:Orchestrations[0].Batch).Count | Should -Be 3
+        @($Response.Body.Cases | Where-Object { $_.Error -eq 'User not found' }).Count | Should -Be 48
+    }
+
+    It 'refuses an empty selection without queueing anything' {
         $None = Invoke-ExecBECBulkCheck -Request (New-Request ([pscustomobject]@{ tenantFilter = 'contoso.com'; UserIds = @() })) -TriggerMetadata $null
+        $None.StatusCode | Should -Be 500
         $None.Body.Results | Should -Match 'No users'
         $script:Orchestrations.Count | Should -Be 0
         $script:Rows.Count | Should -Be 0

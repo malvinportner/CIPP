@@ -15289,8 +15289,8 @@
                     "description": "on Purge: must equal the search name"
                   },
                   "EndDate": {
-                    "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "type": "string"
                   },
                   "Locations": {
                     "type": "array",
@@ -15306,8 +15306,8 @@
                     "type": "string"
                   },
                   "StartDate": {
-                    "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "type": "string"
                   },
                   "Subject": {
                     "type": "string"
